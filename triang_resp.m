@@ -23,8 +23,11 @@ function G = triang_resp(Tfall, order)
         error('pade:InvalidOrder', 'ORDER must be in the range 2-20.');
     end
 
-    s = tf('s')
-    t1 = 1
-    t2 = t1 + Tfall
-    G = ((t2-t1) + t1*pade(t2,order) - t2*pade(t1,order)) / (s^2*t1*(t2-t1))
+    s = tf('s');
+    t1 = 1;
+    t2 = t1 + Tfall;
+    Graw = ((t2-t1) + t1*pade(t2,order) - t2*pade(t1,order)) / (s^2*t1*(t2-t1));
+    % 'minreal' removes poles/zeros which are close to each other. Adding this made the function work for 'order' > 12.
+    G = minreal(Graw);
 end
+
