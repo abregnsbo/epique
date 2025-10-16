@@ -1,4 +1,4 @@
-function optimize_ct_impulse(hfun)
+function sys = optimize_ct_impulse(hfun)
 % Optimize continuous-time poles/zeros (order 10) to match a triangular impulse response
 % Does not work on Octave.
 %
@@ -109,10 +109,9 @@ fprintf('Refined RMS: %.4e\n', rms1);
 figure; 
 subplot(2,1,1);
 plot(t,h,'k-', 'LineWidth',1.5); hold on;
-plot(t,y0,'r--', 'LineWidth',1.0);
 plot(t,y,'b-', 'LineWidth',1.2);
 grid on; xlabel('t [s]'); ylabel('h(t)');
-legend('target','init','refined'); title(sprintf('Impulse fit (na=%d, nb=%d)  RMS: init %.2e  refined %.2e',na,nb,rms0,rms1));
+legend('target','refined'); title(sprintf('Impulse fit (na=%d, nb=%d)  RMS: init %.2e  refined %.2e',na,nb,rms0,rms1));
 
 subplot(2,1,2);
 [m,pw,w] = bode_mag(sys, 512);
