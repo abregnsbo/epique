@@ -4,3 +4,7 @@ lumped RLC filter.
 
 % impulse(triang_resp(0.5,12),2.5)
 
+% optimize_ct_triangular_impulse
+% or provide a custom target via function handle:
+% optimize_ct_impulse(@soft_exp_decay)
+

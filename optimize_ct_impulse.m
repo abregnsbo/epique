@@ -1,10 +1,10 @@
-function optimize_ct_triangular_impulse
+function optimize_ct_impulse(hfun)
 % Optimize continuous-time poles/zeros (order 10) to match a triangular impulse response
-% MATLAB (R2016b+) and Octave compatible. In Octave, `pkg load control optim signal`.
+% Does not work on Octave.
 %
-% Target impulse h_d(t): rise linearly 0->1 over [0,1], fall linearly to 0 over (1,1.5], then 0.
-% Time horizon T=2.5 captures tail. Fits a stable analog transfer function of order 10
-% (denominator degree = 10). Numerator degree nb < 10 (default 9).
+% Target impulse as defined by 'hfun'
+% Time horizon T=2.5 captures tail. Fits a stable analog transfer function of order 'na'
+% (denominator degree = na). Numerator degree nb < na
 %
 % Steps:
 % 1) Build desired impulse h_d(t)
@@ -13,8 +13,8 @@ function optimize_ct_triangular_impulse
 % 4) Report RMS error and plot
 
 % ---------------------- User-configurable parameters ----------------------
-na = 6;              % denominator order (pole count)
-nb = 5;               % numerator order (< na); set 0..na-1
+na = 8;              % denominator order (pole count)
+nb = na-1;               % numerator order (< na); set 0..na-1
 T  = 3.5;             % seconds, horizon that safely captures tail
 dt = 1e-3;            % time step for evaluation of objective (seconds)
 Nw = 2048;            % frequency samples for initialization
@@ -25,23 +25,13 @@ num_complex_pairs = floor(na/2);     % for varpro: number of complex pole pairs 
 % Optional: emphasize early-time samples in objective (set w_time=[]) to disable
 w_time = [];          % e.g., w_time = 1./sqrt(1 + ( (0:dt:T).'/0.5 ).^2 );
 
-% ------------------------------ Setup ------------------------------------
-is_octave = exist('OCTAVE_VERSION','builtin') ~= 0;
-if is_octave
-  try
-    pkg('load','control');
-  catch, end
-  try
-    pkg('load','optim');
-  catch, end
-  try
-    pkg('load','signal');
-  catch, end
-end
-
 % Time grid and target impulse
 t = (0:dt:T).';
-h = desired_impulse(t);
+if nargin < 1 || isempty(hfun)
+  % Default target: triangular impulse defined in triangular.m
+  hfun = @triangular; % function handle
+end
+h = hfun(t);
 if isempty(w_time), w_time = ones(size(t)); end
 w_time = w_time(:);
 
@@ -134,18 +124,10 @@ fprintf('\nFinal transfer function coefficients (descending powers of s):\n');
 disp('Numerator b:'); disp(b);
 disp('Denominator a:'); disp(a);
 
-end % function optimize_ct_triangular_impulse
+end % function optimize_ct_impulse
 
 % --------------------------- Helper functions -----------------------------
-function h = desired_impulse(t)
-  % Piecewise-linear: rise 0..1, fall 1..1.5, zero elsewhere
-  h = zeros(size(t));
-  idx1 = t<=1;
-  h(idx1) = t(idx1);
-  idx2 = t>1 & t<=1.5;
-  h(idx2) = 3 - 2*t(idx2);
-  % t>1.5 stays 0
-end
+% (desired_impulse moved to triangular.m)
 
 function [b,a,ok] = init_invfreqs(t,h,nb,na,Nw)
   ok = false; b = []; a = [];
