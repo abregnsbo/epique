@@ -1,10 +1,19 @@
 Investigation of building an Electronic Mode Filter (EMF) using a microstrip design. First step is to approximate the
-mode function (more precisely the time reversed mode function) with a rational H(s). A rational H(s) represents a
-lumped RLC filter.
+mode function (more precisely the time reversed mode function) with a rational H(s). For H(s) to be realizable as a
+discreet lumped RLC filter, H(s) must have both poles and zeros in LHP (left half-plane of the s-lane).
 
-% impulse(triang_resp(0.5,12),2.5)
+Mode functions:
 
-% optimize_ct_impulse
-% or provide a custom target via function handle and capture the TF:
-% sys = optimize_ct_impulse(@soft_exp_decay)
+soft_exp_decay(t, a, decayDur): model what Jonas Neergaard described as desirable on Slack, October 2025. Starts with
+     an exponential rise, then smothly reaching a top, falling down x2 faster than rising, and smoothly doing back to
+     zero.
 
+
+Functions returning H(s) as a MATLAB 'tf' object, given an input function:
+
+optimize_ct_impulse(@soft_exp_decay): with 8th order able to approximate 'soft_exp_decay' very well, BUT return
+     strongly non-minphase transfer function, where all zeros are in RHP.
+
+
+
+codex resume 0199f27d-1c34-7020-a915-893b768e19e2
