@@ -78,7 +78,7 @@ obj_scl = @(th) sum(abs(obj_vec(th)).^2);
 best_th = [];
 best_f  = inf;
 % Live plotting/state
-t0 = tic; next_stats = stats_interval; next_imp = impulse_interval;
+t0 = tic; next_stats = stats_interval; next_imp = impulse_interval; next_save = impulse_interval;
 time_hist = []; best_hist = []; temp_hist = []; acc_hist = [];
 acc_accept = 0; acc_total = 0; do_plot = true;
 figStats = []; figImp = [];
@@ -171,6 +171,17 @@ while true
         do_plot = false; % disable plotting if headless
       end
       next_stats = tnow + max(1, stats_interval);
+    end
+
+    % Independent autosave every minute
+    if tnow >= next_save
+      try
+        [zBest,pBest,kBest] = unpack_params(best_th, nc_p, nr_p, nc_z, nr_z);
+        sysBest = zpk(zBest,pBest,kBest);
+        save('optimize_lhp.mat','sysBest','time_hist','best_hist','temp_hist','acc_hist','t','h');
+      catch
+      end
+      next_save = tnow + max(10, impulse_interval);
     end
 
     if do_plot && tnow >= next_imp
@@ -383,3 +394,4 @@ function [mag,phs,w] = bode_mag(sys, N)
   mag = abs(H(:));
   phs = angle(H(:)); %#ok<NASGU>
 end
+
